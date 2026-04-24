@@ -524,7 +524,7 @@ impl Animation for StatusBar {
         if left < 0 {
             left = 0;
         }
-        cprint!(_; " ");
+        print!("  ");
         for _ in 0..full {
             cprint!(base2 on base2; "{}", PARTIALS[7]);
         }
