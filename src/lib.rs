@@ -15,11 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+pub mod animations;
+
 /// List of available colors to be used with `cprint!` and `cprintln!`
-/// Only here for book-keeping.
 ///
 ///  In macro, use all lowercase and spaces for colors
 /// e.g. BrightRed -> `$crate::cprintln!(bright red; "red");`
+#[derive(Debug, Clone, Copy)]
 pub enum Colors {
     Black,
     White,
@@ -65,6 +67,113 @@ pub enum Colors {
     Purple,
     Brown,
     LightBrown,
+    Foreground,
+    Background,
+    Ok,
+    Error,
+    Warn,
+    Info,
+    Verbose,
+}
+impl Colors {
+    pub fn to_color(&self) -> u32 {
+        match self {
+            Colors::Black => _color!(black),
+            Colors::White => _color!(white),
+            Colors::Red => _color!(red),
+            Colors::Green => _color!(green),
+            Colors::Blue => _color!(blue),
+            Colors::DarkRed => _color!(dark red),
+            Colors::DarkGreen => _color!(dark green),
+            Colors::DarkBlue => _color!(dark blue),
+            Colors::LightRed => _color!(light red),
+            Colors::LightGreen => _color!(light green),
+            Colors::LightBlue => _color!(light blue),
+            Colors::BrightRed => _color!(bright red),
+            Colors::BrightGreen => _color!(bright green),
+            Colors::BrightBlue => _color!(bright blue),
+            Colors::DarkYellow => _color!(dark yellow),
+            Colors::Yellow => _color!(yellow),
+            Colors::LightYellow => _color!(light yellow),
+            Colors::BrightYellow => _color!(bright yellow),
+            Colors::DarkMagenta => _color!(dark magenta),
+            Colors::Magenta => _color!(magenta),
+            Colors::LightMagenta => _color!(light magenta),
+            Colors::BrightMagenta => _color!(bright magenta),
+            Colors::DarkCyan => _color!(dark cyan),
+            Colors::Cyan => _color!(cyan),
+            Colors::LightCyan => _color!(light cyan),
+            Colors::BrightCyan => _color!(bright cyan),
+            Colors::DarkPink => _color!(dark pink),
+            Colors::Pink => _color!(pink),
+            Colors::LightPink => _color!(light pink),
+            Colors::DarkOrange => _color!(dark orange),
+            Colors::Orange => _color!(orange),
+            Colors::LightOrange => _color!(light orange),
+            Colors::DarkGray => _color!(dark gray),
+            Colors::Gray => _color!(gray),
+            Colors::LightGray => _color!(light gray),
+            Colors::Lime => _color!(lime),
+            Colors::Peach => _color!(peach),
+            Colors::Sky => _color!(sky),
+            Colors::Lavender => _color!(lavender),
+            Colors::Teal => _color!(teal),
+            Colors::Maroon => _color!(maroon),
+            Colors::Purple => _color!(purple),
+            Colors::Brown => _color!(brown),
+            Colors::LightBrown => _color!(light brown),
+
+            Colors::Foreground => _color!(fg),
+            Colors::Background => _color!(bg),
+
+            Colors::Ok => _color!(ok),
+            Colors::Warn => _color!(warn),
+            Colors::Error => _color!(error),
+            Colors::Info => _color!(info),
+            Colors::Verbose => _color!(verbose),
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! cprint_term {
+    () => {
+        $crate::cprint_term!(@all)
+    };
+
+    ($tt:tt) => {
+        $crate::cprint_term!(@all, $tt)
+    };
+
+    (@all $(, $tt:tt)? $(,)?) => {
+        $crate::cprint_term!($($tt)?;fg);
+        $crate::cprint_term!($($tt)?;bg);
+        println!("");
+        $crate::cprint_term!($($tt)?;base0);
+        $crate::cprint_term!($($tt)?;base1);
+        $crate::cprint_term!($($tt)?;base2);
+        $crate::cprint_term!($($tt)?;base3);
+        $crate::cprint_term!($($tt)?;base4);
+        $crate::cprint_term!($($tt)?;base5);
+        $crate::cprint_term!($($tt)?;base6);
+        $crate::cprint_term!($($tt)?;base7);
+        println!("");
+        $crate::cprint_term!($($tt)?;strong0);
+        $crate::cprint_term!($($tt)?;strong1);
+        $crate::cprint_term!($($tt)?;strong2);
+        $crate::cprint_term!($($tt)?;strong3);
+        $crate::cprint_term!($($tt)?;strong4);
+        $crate::cprint_term!($($tt)?;strong5);
+        $crate::cprint_term!($($tt)?;strong6);
+        $crate::cprint_term!($($tt)?;strong7);
+    };
+
+    ($($cmod:ident)?; $($tt:tt)*) => {
+        $(
+            print!("{}", $crate::_cmod!($cmod));
+        )?
+        println!("\x1b[38;5;{}m{}\x1b[0m", $crate::_color!($($tt)*), stringify!($($tt)*));
+    };
 }
 
 /// Print all of the available colors and names
@@ -248,9 +357,9 @@ pub mod internal {
     (light gray) =>      { 252 };
     (dark gray) =>       { 242 };
 
-    (grey) =>            { gray };
-    (light grey) =>      { light gray };
-    (dark grey) =>       { dark gray };
+    (grey) =>            { $crate::_color!(gray) };
+    (light grey) =>      { $crate::_color!(light gray) };
+    (dark grey) =>       { $crate::_color!(dark gray) };
 
     (lime) =>            { $crate::_color!(@code, 3, 5, 0) };
     (peach) =>           { $crate::_color!(@code, 5, 3, 1) };
@@ -262,6 +371,202 @@ pub mod internal {
     (brown) =>           { $crate::_color!(@code, 2, 1, 0) };
     (light brown) =>     { $crate::_color!(@code, 3, 2, 0) };
 
+    (base0) =>            { 0 };
+    (base1) =>            { 1 };
+    (base2) =>            { 2 };
+    (base3) =>            { 3 };
+    (base4) =>            { 4 };
+    (base5) =>            { 5 };
+    (base6) =>            { 6 };
+    (base7) =>            { 7 };
+
+    (strong0) =>          { 8  };
+    (strong1) =>          { 9  };
+    (strong2) =>          { 10 };
+    (strong3) =>          { 11 };
+    (strong4) =>          { 12 };
+    (strong5) =>          { 13 };
+    (strong6) =>          { 14 };
+    (strong7) =>          { 15 };
+
+    (bg)       =>          { 0 };
+    (lower)    =>          { 1 };
+    (low)      =>          { 2 };
+    (mid_low)  =>          { 3 };
+    (mid_high) =>          { 4 };
+    (high)     =>          { 5 };
+    (higher)   =>          { 6 };
+    (fg_w)       =>        { 7 };
+
+    (bg_s)       =>          { 8  };
+    (lower_s)    =>          { 9  };
+    (low_s)      =>          { 10 };
+    (mid_low_s)  =>          { 11 };
+    (mid_high_s) =>          { 12 };
+    (high_s)     =>          { 13 };
+    (higher_s)   =>          { 14 };
+    (fg)         =>          { 15 };
+
+
+    (error)        =>           { 9  };
+    (ok)           =>           { 10 };
+    (warn)         =>           { 11 };
+    (info)         =>           { 12 };
+    (verbose)      =>           { 13 };
+
+    // ===== Foreground ANSI (literal) =====
+    (@fg black)         => { "\x1b[38;5;232m" };
+    (@fg white)         => { "\x1b[38;5;255m" };
+
+    (@fg pure red)      => { "\x1b[38;5;196m" };
+    (@fg pure green)    => { "\x1b[38;5;46m" };
+    (@fg pure blue)     => { "\x1b[38;5;21m" };
+
+    (@fg red)           => { "\x1b[38;5;203m" };
+    (@fg green)         => { "\x1b[38;5;113m" };
+    (@fg blue)          => { "\x1b[38;5;111m" };
+
+    (@fg light red)     => { "\x1b[38;5;217m" };
+    (@fg light green)   => { "\x1b[38;5;157m" };
+    (@fg light blue)    => { "\x1b[38;5;153m" };
+
+    (@fg dark red)      => { "\x1b[38;5;160m" };
+    (@fg dark green)    => { "\x1b[38;5;34m" };
+    (@fg dark blue)     => { "\x1b[38;5;18m" };
+
+    (@fg bright red)    => { "\x1b[38;5;196m" };
+    (@fg bright green)  => { "\x1b[38;5;46m" };
+    (@fg bright blue)   => { "\x1b[38;5;21m" };
+
+
+    // ===== Secondary =====
+    (@fg yellow)        => { "\x1b[38;5;184m" };
+    (@fg dark yellow)   => { "\x1b[38;5;100m" };
+    (@fg light yellow)  => { "\x1b[38;5;186m" };
+    (@fg bright yellow) => { "\x1b[38;5;226m" };
+
+    (@fg magenta)       => { "\x1b[38;5;169m" };
+    (@fg dark magenta)  => { "\x1b[38;5;127m" };
+    (@fg light magenta) => { "\x1b[38;5;176m" };
+    (@fg bright magenta)=> { "\x1b[38;5;201m" };
+
+    (@fg cyan)          => { "\x1b[38;5;44m" };
+    (@fg dark cyan)     => { "\x1b[38;5;30m" };
+    (@fg light cyan)    => { "\x1b[38;5;116m" };
+    (@fg bright cyan)   => { "\x1b[38;5;51m" };
+
+
+    // ===== Alternatives =====
+    (@fg dark pink)     => { "\x1b[38;5;132m" };
+    (@fg pink)          => { "\x1b[38;5;212m" };
+    (@fg light pink)    => { "\x1b[38;5;225m" };
+
+    (@fg dark orange)   => { "\x1b[38;5;166m" };
+    (@fg orange)        => { "\x1b[38;5;202m" };
+    (@fg light orange)  => { "\x1b[38;5;215m" };
+
+    (@fg gray)          => { "\x1b[38;5;246m" };
+    (@fg light gray)    => { "\x1b[38;5;252m" };
+    (@fg dark gray)     => { "\x1b[38;5;242m" };
+
+    (@fg grey)          => { "\x1b[38;5;246m" };
+    (@fg light grey)    => { "\x1b[38;5;252m" };
+    (@fg dark grey)     => { "\x1b[38;5;242m" };
+
+    (@fg lime)          => { "\x1b[38;5;154m" };
+    (@fg peach)         => { "\x1b[38;5;215m" };
+    (@fg sky)           => { "\x1b[38;5;111m" };
+    (@fg lavender)      => { "\x1b[38;5;147m" };
+    (@fg teal)          => { "\x1b[38;5;121m" };
+    (@fg maroon)        => { "\x1b[38;5;209m" };
+    (@fg purple)        => { "\x1b[38;5;129m" };
+    (@fg brown)         => { "\x1b[38;5;94m" };
+    (@fg light brown)   => { "\x1b[38;5;136m" };
+
+
+    // ===== UI =====
+    (@fg error)   => { "\x1b[38;5;9m" };
+    (@fg ok)      => { "\x1b[38;5;10m" };
+    (@fg warn)    => { "\x1b[38;5;11m" };
+    (@fg info)    => { "\x1b[38;5;12m" };
+
+
+    // ===== Background ANSI (literal) =====
+    (@bg black)         => { "\x1b[48;5;232m" };
+    (@bg white)         => { "\x1b[48;5;255m" };
+
+    (@bg pure red)      => { "\x1b[48;5;196m" };
+    (@bg pure green)    => { "\x1b[48;5;46m" };
+    (@bg pure blue)     => { "\x1b[48;5;21m" };
+
+    (@bg red)           => { "\x1b[48;5;203m" };
+    (@bg green)         => { "\x1b[48;5;113m" };
+    (@bg blue)          => { "\x1b[48;5;111m" };
+
+    (@bg light red)     => { "\x1b[48;5;217m" };
+    (@bg light green)   => { "\x1b[48;5;157m" };
+    (@bg light blue)    => { "\x1b[48;5;153m" };
+
+    (@bg dark red)      => { "\x1b[48;5;160m" };
+    (@bg dark green)    => { "\x1b[48;5;34m" };
+    (@bg dark blue)     => { "\x1b[48;5;18m" };
+
+    (@bg bright red)    => { "\x1b[48;5;196m" };
+    (@bg bright green)  => { "\x1b[48;5;46m" };
+    (@bg bright blue)   => { "\x1b[48;5;21m" };
+
+
+    // ===== Secondary =====
+    (@bg yellow)        => { "\x1b[48;5;184m" };
+    (@bg dark yellow)   => { "\x1b[48;5;100m" };
+    (@bg light yellow)  => { "\x1b[48;5;186m" };
+    (@bg bright yellow) => { "\x1b[48;5;226m" };
+
+    (@bg magenta)       => { "\x1b[48;5;169m" };
+    (@bg dark magenta)  => { "\x1b[48;5;127m" };
+    (@bg light magenta) => { "\x1b[48;5;176m" };
+    (@bg bright magenta)=> { "\x1b[48;5;201m" };
+
+    (@bg cyan)          => { "\x1b[48;5;44m" };
+    (@bg dark cyan)     => { "\x1b[48;5;30m" };
+    (@bg light cyan)    => { "\x1b[48;5;116m" };
+    (@bg bright cyan)   => { "\x1b[48;5;51m" };
+
+
+    // ===== Alternatives =====
+    (@bg dark pink)     => { "\x1b[48;5;132m" };
+    (@bg pink)          => { "\x1b[48;5;212m" };
+    (@bg light pink)    => { "\x1b[48;5;225m" };
+
+    (@bg dark orange)   => { "\x1b[48;5;166m" };
+    (@bg orange)        => { "\x1b[48;5;202m" };
+    (@bg light orange)  => { "\x1b[48;5;215m" };
+
+    (@bg gray)          => { "\x1b[48;5;246m" };
+    (@bg light gray)    => { "\x1b[48;5;252m" };
+    (@bg dark gray)     => { "\x1b[48;5;242m" };
+
+    (@bg grey)          => { "\x1b[48;5;246m" };
+    (@bg light grey)    => { "\x1b[48;5;252m" };
+    (@bg dark grey)     => { "\x1b[48;5;242m" };
+
+    (@bg lime)          => { "\x1b[48;5;154m" };
+    (@bg peach)         => { "\x1b[48;5;215m" };
+    (@bg sky)           => { "\x1b[48;5;111m" };
+    (@bg lavender)      => { "\x1b[48;5;147m" };
+    (@bg teal)          => { "\x1b[48;5;121m" };
+    (@bg maroon)        => { "\x1b[48;5;209m" };
+    (@bg purple)        => { "\x1b[48;5;129m" };
+    (@bg brown)         => { "\x1b[48;5;94m" };
+    (@bg light brown)   => { "\x1b[48;5;136m" };
+
+
+    // ===== UI =====
+    (@bg error)   => { "\x1b[48;5;9m" };
+    (@bg ok)      => { "\x1b[48;5;10m" };
+    (@bg warn)    => { "\x1b[48;5;11m" };
+    (@bg info)    => { "\x1b[48;5;12m" };
+    (@bg verbose) => { "\x1b[48;5;13m" };
 
     (@code, $r:literal, $g:literal, $b:literal) => {
         (16 + 36*$r + 6*$g + $b)
@@ -269,411 +574,299 @@ pub mod internal {
 }
 }
 
+/// Internal emitter used by `cprint!` and `cprintln!`.
+///
+/// This keeps the public macros as close to `print!` / `println!` as possible while
+/// making each color branch perform a single output macro call.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! _cprint_emit {
+    (@print $style:expr; $($tt:tt)*) => {{
+        print!("{}{}{}", $style, format_args!($($tt)*), $crate::_color!(reset));
+    }};
+
+    (@println $style:expr; $($tt:tt)*) => {{
+        println!("{}{}{}", $style, format_args!($($tt)*), $crate::_color!(reset));
+    }};
+
+    (@print_plain; $($tt:tt)*) => {{
+        print!($($tt)*);
+    }};
+
+    (@println_plain; $($tt:tt)*) => {{
+        println!($($tt)*);
+    }};
+}
+
+/// Shared parser for `cprint!` and `cprintln!`.
+#[doc(hidden)]
+#[macro_export]
+macro_rules! _cprint_parse {
+    // ===== Option<Colors> forms =====
+    (@$mode:ident; [$cf:expr] on [$cb:expr]; $cmod:ident; $($tt:tt)*) => {{
+        match ($cf, $cb) {
+            (Some(f), Some(b)) => $crate::_cprint_parse!(@$mode; {f} on {b}; $cmod; $($tt)*),
+            (Some(f), None) => $crate::_cprint_parse!(@$mode; {f}; $cmod; $($tt)*),
+            (None, Some(b)) => $crate::_cprint_parse!(@$mode; _ on {b}; $cmod; $($tt)*),
+            (None, None) => $crate::_cprint_parse!(@$mode; _; $cmod; $($tt)*),
+        }
+    }};
+
+    (@$mode:ident; [$cf:expr] on [$cb:expr]; $($tt:tt)*) => {{
+        match ($cf, $cb) {
+            (Some(f), Some(b)) => $crate::_cprint_parse!(@$mode; {f} on {b}; $($tt)*),
+            (Some(f), None) => $crate::_cprint_parse!(@$mode; {f}; $($tt)*),
+            (None, Some(b)) => $crate::_cprint_parse!(@$mode; _ on {b}; $($tt)*),
+            (None, None) => $crate::_cprint_parse!(@$mode; _; $($tt)*),
+        }
+    }};
+
+    (@$mode:ident; [$cf:expr]; $cmod:ident; $($tt:tt)*) => {{
+        match $cf {
+            Some(c) => $crate::_cprint_parse!(@$mode; {c}; $cmod; $($tt)*),
+            None => $crate::_cprint_parse!(@$mode; _; $cmod; $($tt)*),
+        }
+    }};
+
+    (@$mode:ident; [$cf:expr]; $($tt:tt)*) => {{
+        match $cf {
+            Some(c) => $crate::_cprint_parse!(@$mode; {c}; $($tt)*),
+            None => $crate::_cprint_parse!(@$mode; _; $($tt)*),
+        }
+    }};
+
+    (@$mode:ident; _ on [$cb:expr]; $cmod:ident; $($tt:tt)*) => {{
+        match $cb {
+            Some(c) => $crate::_cprint_parse!(@$mode; _ on {c}; $cmod; $($tt)*),
+            None => $crate::_cprint_parse!(@$mode; _; $cmod; $($tt)*),
+        }
+    }};
+
+    (@$mode:ident; _ on [$cb:expr]; $($tt:tt)*) => {{
+        match $cb {
+            Some(c) => $crate::_cprint_parse!(@$mode; _ on {c}; $($tt)*),
+            None => $crate::_cprint_parse!(@$mode; _; $($tt)*),
+        }
+    }};
+
+
+    // ===== Default foreground/background forms =====
+    (@$mode:ident; _ on {$cb:expr}; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m", $crate::_cmod!($cmod), $cb.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; _ on {$cb:expr}; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m", $cb.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; _ on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt2 $color2)); $($tt)*)
+    };
+
+    (@$mode:ident; _ on $alt2:ident $color2:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m", $crate::_color!($alt2 $color2)); $($tt)*)
+    };
+
+    (@$mode:ident; _ on $color2:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2)); $($tt)*)
+    };
+
+    (@$mode:ident; _ on $color2:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m", $crate::_color!($color2)); $($tt)*)
+    };
+
+    (@$mode:ident; _; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode $crate::_cmod!($cmod); $($tt)*)
+    };
+
+    (@$mode:ident; _; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode ""; $($tt)*)
+    };
+
+    // ===== Enum foreground/background forms =====
+    (@$mode:ident; {$cf:expr} on {$cb:expr}; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $cb.to_color(), $cf.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; {$cf:expr} on {$cb:expr}; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m\x1b[38;5;{}m", $cb.to_color(), $cf.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; {$cf:expr} on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt2 $color2), $cf.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; {$cf:expr} on $alt2:ident $color2:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($alt2 $color2), $cf.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; {$cf:expr} on $color2:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2), $cf.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; {$cf:expr} on $color2:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($color2), $cf.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; $alt:ident $color:ident on {$cb:expr}; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $cb.to_color(), $crate::_color!($alt $color)); $($tt)*)
+    };
+
+    (@$mode:ident; $alt:ident $color:ident on {$cb:expr}; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m\x1b[38;5;{}m", $cb.to_color(), $crate::_color!($alt $color)); $($tt)*)
+    };
+
+    (@$mode:ident; $color:ident on {$cb:expr}; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $cb.to_color(), $crate::_color!($color)); $($tt)*)
+    };
+
+    (@$mode:ident; $color:ident on {$cb:expr}; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m\x1b[38;5;{}m", $cb.to_color(), $crate::_color!($color)); $($tt)*)
+    };
+
+    (@$mode:ident; _ on {$cb:expr}; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m", $crate::_cmod!($cmod), $cb.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; _ on {$cb:expr}; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m", $cb.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; {$cf:expr}; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[38;5;{}m", $crate::_cmod!($cmod), $cf.to_color()); $($tt)*)
+    };
+
+    (@$mode:ident; {$cf:expr}; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[38;5;{}m", $cf.to_color()); $($tt)*)
+    };
+
+    // ===== Named foreground/background forms =====
+    (@$mode:ident; $alt:ident $color:ident on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt2 $color2), $crate::_color!($alt $color)); $($tt)*)
+    };
+
+    (@$mode:ident; $alt:ident $color:ident on $alt2:ident $color2:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($alt2 $color2), $crate::_color!($alt $color)); $($tt)*)
+    };
+
+    (@$mode:ident; $alt:ident $color:ident on $color2:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2), $crate::_color!($alt $color)); $($tt)*)
+    };
+
+    (@$mode:ident; $alt:ident $color:ident on $color2:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($color2), $crate::_color!($alt $color)); $($tt)*)
+    };
+
+    (@$mode:ident; $color:ident on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt2 $color2), $crate::_color!($color)); $($tt)*)
+    };
+
+    (@$mode:ident; $color:ident on $alt2:ident $color2:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($alt2 $color2), $crate::_color!($color)); $($tt)*)
+    };
+
+    (@$mode:ident; $color:ident on $color2:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2), $crate::_color!($color)); $($tt)*)
+    };
+
+    (@$mode:ident; $color:ident on $color2:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($color2), $crate::_color!($color)); $($tt)*)
+    };
+
+    (@$mode:ident; _ on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt2 $color2)); $($tt)*)
+    };
+
+    (@$mode:ident; _ on $alt2:ident $color2:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m", $crate::_color!($alt2 $color2)); $($tt)*)
+    };
+
+    (@$mode:ident; _ on $color2:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[48;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2)); $($tt)*)
+    };
+
+    (@$mode:ident; _ on $color2:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[48;5;{}m", $crate::_color!($color2)); $($tt)*)
+    };
+
+    (@$mode:ident; $alt:ident $color:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt $color)); $($tt)*)
+    };
+
+    (@$mode:ident; $alt:ident $color:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[38;5;{}m", $crate::_color!($alt $color)); $($tt)*)
+    };
+
+    (@$mode:ident; $color:ident; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("{}\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color)); $($tt)*)
+    };
+
+    (@$mode:ident; $color:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode format_args!("\x1b[38;5;{}m", $crate::_color!($color)); $($tt)*)
+    };
+
+    // ===== Default foreground forms =====
+    (@$mode:ident; _; $cmod:ident; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode $crate::_cmod!($cmod); $($tt)*)
+    };
+
+    (@$mode:ident; _; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@$mode ""; $($tt)*)
+    };
+
+    // ===== Plain drop-in forms =====
+    (@print; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@print_plain; $($tt)*)
+    };
+
+    (@println; $($tt:tt)*) => {
+        $crate::_cprint_emit!(@println_plain; $($tt)*)
+    };
+}
+
 /// #### println! with colors
 /// Behaves almost identically to the standard `println!` macro.
-///
-/// In fact it can act as a drop in replacement.
-///
-/// # Arguments
-/// a `cprintln!` call requires a prepend of a color, other optional params, then `;`
-/// to the fmt and arguments passed to `println!`
-///
-/// ## Colors
-/// A full list of colors can be seen by looking at the Color enum, or by using
-/// the `cprint_palette!` macro. Additionally, `_` can be used as a placeholder
-/// for terminal default color.
-///
-/// ## Backgrounds
-/// `cprintln!` supports the same color list being used as text background, this can be
-/// done by following a `color` keyword with the `on` `<color>` `;`
-///
-/// ## Modifiers
-/// Text can be further modified after a color with an optional parameter
-///     - `bold`
-///     - `italic`
-///     - `underline`
-///     - `x` | `strikethrough` | `dashed`
-///     - `invert` | `reverse`
-///     - `hidden`
-///
-/// # Examples
-///
-/// ```
-/// use cprint::cprintln;
-///
-/// // println!("hello world");  ==
-/// // cprintln!("hello world"); ==
-/// cprintln!(_; "hello world");
-///
-/// cprintln!(red; "red text");
-/// cprintln!(light red; "light red text");
-/// cprintln!(green; bold; "bold green text");
-/// cprintln!(dark blue; italic; "italic dark blue text");
-/// cprintln!(_; invert; "inverted color text");
-/// cprintln!(_; italic; "italic default text");
-/// cprintln!(_; x; "strikethrough text with args: 1=={} and 2=={}", 1, 2);
-/// cprintln!(red on black; "red text on black background");
-/// cprintln!(light red on black; "light red text on black background");
-/// cprintln!(bright red on dark gray; "bright red text on dark gray background");
-/// cprintln!(bright red on dark gray; invert; "dark gray text on bright red background");
-/// ```
 #[macro_export]
 macro_rules! cprintln {
-    (_ on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m", cprint::$crate::_cmod!($cmod), $crate::_color!($alt2 $color2));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    (_ on $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    (_; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}", $crate::_cmod!($cmod));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    (_ on $alt2:ident $color2:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m", $crate::_color!($alt2 $color2));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    (_ on $color2:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[48;5;{}m", $crate::_color!($color2));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    (_; $($tt:tt)*) => {
-        {
-            println!($($tt)*);
-        }
-    };
-
-
-    ($alt:ident $color:ident on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt2 $color2), $crate::_color!($alt $color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($color:ident on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt2 $color2), $crate::_color!($color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($alt:ident $color:ident on $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2), $crate::_color!($alt $color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($color:ident on $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2), $crate::_color!($color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($alt:ident $color:ident on $alt2:ident $color2:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($alt2 $color2), $crate::_color!($alt $color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($color:ident on $alt2:ident $color2:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($alt2 $color2), $crate::_color!($color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($alt:ident $color:ident on $color2:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($color2), $crate::_color!($alt $color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($color:ident on $color2:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($color2), $crate::_color!($color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($alt:ident $color:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt $color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-
-    ($alt:ident $color:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[38;5;{}m", $crate::_color!($alt $color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($color:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
-
-    ($color:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[38;5;{}m", $crate::_color!($color));
-            print!($($tt)*);
-            println!("{}", $crate::_color!(reset));
-        }
-    };
-
     ($($tt:tt)*) => {
-        {
-            println!($($tt)*);
-        }
+        $crate::_cprint_parse!(@println; $($tt)*)
     };
 }
 
 /// #### print! with colors
 /// Behaves almost identically to the standard `print!` macro.
-///
-/// In fact it can act as a drop in replacement.
-///
-/// # Arguments
-/// a `cprint!` call requires a prepend of a color, other optional params, then `;`
-/// to the fmt and arguments passed to `print!`
-///
-/// ## Colors
-/// A full list of colors can be seen by looking at the Color enum, or by using
-/// the `cprint_palette!` macro. Additionally, `_` can be used as a placeholder
-/// for terminal default color.
-///
-/// ## Backgrounds
-/// `cprint!` supports the same color list being used as text background, this can be
-/// done by following a `color` keyword with the `on` `<color>` `;`
-///
-/// ## Modifiers
-/// Text can be further modified after a color with an optional parameter
-///     - `bold`
-///     - `italic`
-///     - `underline`
-///     - `x` | `strikethrough` | `dashed`
-///     - `invert` | `reverse`
-///     - `hidden`
-///
-/// # Examples
-///
-/// ```
-/// use cprint::cprint;
-///
-/// // print!("hello world");  ==
-/// // cprint!("hello world"); ==
-/// cprint!(_; "hello world");
-///
-/// cprint!(red; "red text");
-/// cprint!(light red; "light red text");
-/// cprint!(green; bold; "bold green text");
-/// cprint!(dark blue; italic; "italic dark blue text");
-/// cprint!(_; invert; "inverted color text");
-/// cprint!(_; italic; "italic default text");
-/// cprint!(_; x; "strikethrough text with args: 1=={} and 2=={}", 1, 2);
-/// cprint!(red on black; "red text on black background");
-/// cprint!(light red on black; "light red text on black background");
-/// cprint!(bright red on dark gray; "bright red text on dark gray background");
-/// cprint!(bright red on dark gray; invert; "dark gray text on bright red background");
-/// ```
 #[macro_export]
 macro_rules! cprint {
-    (_ on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt2 $color2));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    (_ on $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    (_; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}", $crate::_cmod!($cmod));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    (_ on $alt2:ident $color2:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m", $crate::_color!($alt2 $color2));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    (_ on $color2:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[48;5;{}m", $crate::_color!($color2));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    (_; $($tt:tt)*) => {
-        {
-            print!($($tt)*);
-        }
-    };
-
-    ($alt:ident $color:ident on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt2 $color2), $crate::_color!($alt $color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($color:ident on $alt2:ident $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt2 $color2), $crate::_color!($color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($alt:ident $color:ident on $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2), $crate::_color!($alt $color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($color:ident on $color2:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color2), $crate::_color!($color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($alt:ident $color:ident on $alt2:ident $color2:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($alt2 $color2), $crate::_color!($alt $color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($color:ident on $alt2:ident $color2:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($alt2 $color2), $crate::_color!($color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($alt:ident $color:ident on $color2:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($color2), $crate::_color!($alt $color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($color:ident on $color2:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[48;5;{}m\x1b[38;5;{}m", $crate::_color!($color2), $crate::_color!($color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($alt:ident $color:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($alt $color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-
-    ($alt:ident $color:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[38;5;{}m", $crate::_color!($alt $color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-    ($color:ident; $cmod:ident; $($tt:tt)*) => {
-        {
-            print!("{}\x1b[38;5;{}m", $crate::_cmod!($cmod), $crate::_color!($color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
-
-    ($color:ident; $($tt:tt)*) => {
-        {
-            print!("\x1b[38;5;{}m", $crate::_color!($color));
-            print!($($tt)*);
-            print!("{}", $crate::_color!(reset));
-        }
-    };
-
     ($($tt:tt)*) => {
-        {
-            print!($($tt)*);
-        }
+        $crate::_cprint_parse!(@print; $($tt)*)
     };
+}
+
+pub fn print_reset() {
+    print!("{}", _color!(reset))
+}
+
+pub fn ansi_256_color_to_index(r: u8, g: u8, b: u8) -> u8 {
+    16 + 36*r + 6*g + b
+}
+
+pub fn ansi_256_index_to_color(index: u8) -> Option<(u8, u8, u8)> {
+    if index < 16 || index > 231 {
+        return None; // not in the color cube
+    }
+
+    let i = index - 16;
+
+    let r = i / 36;
+    let g = (i % 36) / 6;
+    let b = i % 6;
+
+    Some((r, g, b))
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::Colors;
 
     macro_rules! section {
         ($name:expr, $s:expr) => {
@@ -686,7 +879,7 @@ mod tests {
         };
     }
 
-    fn full_palette() {
+    pub fn full_palette() {
         cprint_palette!();
     }
 
@@ -728,13 +921,77 @@ mod tests {
         cprintln!(_ on black; invert; "Hello world");
     }
 
+    fn formatter() {
+        cprintln!(lime on black; "{:<10}|{}", "hello", "world"); // works
+
+        cprint!(lime on black; "{:<10}|", "hello");
+        cprintln!(red; bold; "{}", "world");
+    }
+
+    fn enums() {
+        cprintln!({Colors::Orange}; "{{Colors::Orange}}");
+        cprintln!({Colors::Pink}; "{{Colors::Pink}}");
+        cprintln!(_ on {Colors::DarkBlue}; "_ on {{Colors::DarkBlue}}");
+        cprintln!({Colors::Black} on {Colors::Pink}; "{{Colors::Black}} on {{Colors::Pink}}");
+        cprintln!({Colors::Pink}; x; "X {{Colors::Pink}}");
+        cprintln!({Colors::Black} on {Colors::Pink}; bold; "bold {{Colors::Black}} on {{Colors::Pink}}");
+    }
+
+    fn options() {
+        let mut fg = Some(Colors::Black);
+        let mut bg = Some(Colors::Red);
+        cprintln!([fg] on [bg]; "Some(Black) on Some(Red)");
+        bg = None;
+        fg = Some(Colors::Red);
+        cprintln!([fg] on [bg]; "Some(Red) on None");
+
+        fg = Some(Colors::Black);
+        bg = Some(Colors::LightBlue);
+        cprintln!([fg] on [bg]; x; "X Some(Black) on Some(LightBlue)");
+        bg = None;
+        fg = Some(Colors::LightBlue);
+        cprintln!([fg] on [bg]; bold; "bold Some(LightBlue) on None");
+    }
+
+    fn terminal() {
+        cprint_term!();
+    }
+
+    fn utility() {
+        cprintln!(ok; "ok");
+        cprintln!(warn; "warn");
+        cprintln!(error; "error");
+        cprintln!(info; "info");
+        cprintln!(verbose; "verbose");
+    }
+
     #[test]
-    fn demo() {
+    pub fn demo() {
+        cprint!({Colors::Lavender}; "====== ");
+        cprint!(red; "C");
+        cprint!(blue; "P");
+        cprint!(green; "R");
+        cprint!(cyan; "I");
+        cprint!(yellow; "N");
+        cprint!(teal; "T");
+        cprint!({Colors::BrightMagenta}; "!");
+        cprintln!({Colors::Lavender}; " ======");
+        println!("");
+        println!("");
+
         section!("pallete", full_palette());
         section!("color", color());
         section!("bold", bold());
         section!("x (strikethrough)", strikethrough());
         section!("with background", with_background());
         section!("inverted (reverse)", reverse());
+        section!("formatters", formatter());
+        section!("using Colors enum", enums());
+        section!("using Option<Colors>", options());
+        section!("Terminal Colors", terminal());
+        section!("Utility Colors", utility());
     }
 }
+
+#[cfg(test)]
+pub use crate::tests::demo as demo;
