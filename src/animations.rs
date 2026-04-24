@@ -1,11 +1,5 @@
-use std::default;
 use std::io::{Write, stdout};
-use std::os::linux::raw::stat;
-use std::sync::{
-    Arc, Mutex, mpsc,
-    mpsc::{Receiver, Sender},
-};
-use std::thread::sleep;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use std::{marker::PhantomData, sync::atomic::AtomicBool};
 
@@ -573,7 +567,6 @@ impl NewAnimationOptions<StatusBar> {
             ..self
         }
     }
-
 }
 
 use text_animations::*;
@@ -581,7 +574,6 @@ use text_animations::*;
 fn animation_test() {
     let max_n: usize = 1024 * 1024 * 8; // 1GB
     let mut n = 0;
-
 
     let mut animation = new::<StatusBar>(50).absolute(max_n).bytes(true).animate();
 
